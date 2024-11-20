@@ -603,6 +603,8 @@ public class BlogJspBean extends ManageBlogJspBean
 
         boolean bPermissionCreate = RBACService.isAuthorized( Tag.PROPERTY_RESOURCE_TYPE, RBAC.WILDCARD_RESOURCES_ID, Tag.PERMISSION_CREATE,
                 (User) getUser( ) );
+
+        model.put(BlogParameterService.MARK_DEFAULT_NUMBER_MANDATORY_TAGS, BlogParameterService.getInstance().getNumberMadantoryTags() );
         // get the docContent from the session
         AdminUser user = AdminUserService.getAdminUser( request );
        List<DocContent> listDocContent = _blogServiceSession.getDocContentFromSession(request.getSession(), user);
@@ -653,6 +655,15 @@ public class BlogJspBean extends ManageBlogJspBean
             {
                 return redirectView( request, VIEW_CREATE_BLOG );
             }
+            // Check if the number of mandatory tags is respected
+            int nNumberMandatoryTags = BlogParameterService.getInstance().getNumberMadantoryTags();
+            if (nNumberMandatoryTags  > _blog.getTag( ).size( ) )
+            {
+                String strMessage = I18nService.getLocalizedString(MESSAGE_ERROR_MANDATORY_TAGS, getLocale( ));
+                addError( strMessage, getLocale( ) );
+                return redirectView( request, VIEW_CREATE_BLOG );
+            }
+
             BlogService.getInstance( ).createBlog( _blog, _blog.getDocContent( ) );
             _blogServiceSession.removeDocContentFromSession( request.getSession( ), user );
 
